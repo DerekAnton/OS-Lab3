@@ -76,9 +76,9 @@ public int create(char name[], int size)
   for(int x = 0 ; x < 16 ; x++){
 	  try {
 		disk.seek(180+ (56*x));
-		disk.readInt();
+		used = disk.readInt();
 		if(used == 0){
-			freeINode = x;
+			freeINode = (180+ (56*x));
 			break;
 		}
 	} catch (IOException e) {
