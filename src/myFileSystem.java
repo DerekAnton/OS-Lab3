@@ -69,6 +69,25 @@ public int create(char name[], int size)
   // Copy the filename to the "name" field
   // Copy the file size (in units of blocks) to the "size" field
 
+ // 128 + 2*8 + 4 +  8*4 + 4
+  //128+52 180
+  int used = 0;
+  int freeINode = -1;
+  for(int x = 0 ; x < 16 ; x++){
+	  try {
+		disk.seek(180+ (56*x));
+		disk.readInt();
+		if(used == 0){
+			freeINode = x;
+			break;
+		}
+	} catch (IOException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	}
+	  
+	  
+  }
   
   
   
