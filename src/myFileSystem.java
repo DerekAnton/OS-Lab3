@@ -79,7 +79,7 @@ public int create(char name[], int size)
 		disk.seek(180+ (56*x));
 		used = disk.readInt();
 		if(used == 0){
-			freeINode = (180+ (56*x));
+			freeINode = (128 + (56*x));
 			break;
 		}
 	} catch (IOException e) {
@@ -114,6 +114,39 @@ public int create(char name[], int size)
   // Write out the 128 byte free block list
   // Move the file pointer to the position on disk where this inode was stored
   // Write out the inode
+  try {
+	//Write Free Block List
+	for(int x = 0; x < 128; x++){
+		disk.seek(x);
+		disk.write(freeBlocks[x]);
+	}
+	
+	//Write Name
+	disk.seek(freeINode);
+	for(int x = 0; x < 8; x++){
+		disk.writeChar(name[x]);
+		disk.seek(freeINode + 2*x);
+	}
+	
+	//Write Size
+	disk.seek(freeINode + 16);
+	disk.writeInt(size);
+	
+	//Write BlackPointers
+	for(int x = 0 ; x < 8 ; x++){
+		disk.seek(freeINode + 20 + 4*x);
+		disk.writeInt(blockPointer[x]);
+	}
+	
+	//Write Used
+	disk.seek(freeINode + 52);
+	disk.writeInt(1);
+	
+	
+} catch (IOException e) {
+	// TODO Auto-generated catch block
+	e.printStackTrace();
+}
   
   
   
