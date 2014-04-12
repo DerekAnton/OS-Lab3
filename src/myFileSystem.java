@@ -38,6 +38,7 @@ public int create(char name[], int size)
   // allocate a new file of this size
   int[] freeBlocks = new int[128];
   boolean space = false;
+  int[] blockPointer = new int[8];
   
   for(int x = 0; x <= 128; x++){
 	  try {
@@ -98,12 +99,28 @@ public int create(char name[], int size)
     // Set the blockPointer[i] field in the inode to this block number.
     // 
  // end for
-
+  for(int i = 0 ; i < size; i++){
+	  int counter = 0;
+	  for(int x : freeBlocks){
+		  if(x == 0){
+			  freeBlocks[counter] = 1;
+			  blockPointer[size] = counter;
+		  }
+		  counter++;
+	  }  
+  }
+  
+  
   // Step 4: Write out the inode and free block list to disk
   //  Move the file pointer to the start of the file 
   // Write out the 128 byte free block list
   // Move the file pointer to the position on disk where this inode was stored
   // Write out the inode
+  
+  
+  
+  
+  
 return 0;
 } // End Create
 
