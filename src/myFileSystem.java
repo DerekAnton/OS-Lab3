@@ -41,7 +41,7 @@ public int create(char name[], int size)
   
   for(int x = 0; x <= 128; x++){
 	  try {
-		disk.seek(0);
+		disk.seek(x);
 		freeBlocks[x] = disk.read();
 	} catch (IOException e) {
 		// TODO Auto-generated catch block
@@ -49,22 +49,16 @@ public int create(char name[], int size)
 	}
   }
   
-  int largestHole = 0;
-  int currentHole = 0;
-  
+  int freeBlockNum = 0;
   for(int i : freeBlocks){
-	 
 	  if(i == 0){
-		currentHole++;
-		if(currentHole > largestHole){
-			largestHole = currentHole;
-		}
-		  largestHole++;
-	  }else{
-		  currentHole = 0;
+		  freeBlockNum++;
 	  }
   }
   
+  if(size < freeBlockNum){
+	  space = true;
+  }
   
   
   // Step 2: we look  for a free inode om disk
@@ -75,6 +69,9 @@ public int create(char name[], int size)
   // Copy the filename to the "name" field
   // Copy the file size (in units of blocks) to the "size" field
 
+  
+  
+  
   // Step 3: Allocate data blocks to the file
   // for(i=0;i<size;i++)
     // Scan the block list that you read in Step 1 for a free block
