@@ -125,21 +125,21 @@ public int create(char name[], int size)
 	disk.seek(freeINode);
 	for(int x = 0; x < 8; x++){
 		disk.writeChar(name[x]);
-		disk.seek(freeINode + 2*x);
+		disk.seek(freeINode + 2*x); // multiply by two because we are writing to a new char, which is 2 bytes
 	}
 	
 	//Write Size
-	disk.seek(freeINode + 16);
+	disk.seek(freeINode + 16); // 16 because we ended on 8*2 in the above loop, so we must seek after where this value has been written to.
 	disk.writeInt(size);
 	
 	//Write BlackPointers
 	for(int x = 0 ; x < 8 ; x++){
-		disk.seek(freeINode + 20 + 4*x);
+		disk.seek(freeINode + 20 + 4*x); // start at 20 because the above writes the size to the next integer (4 bytes)  and multiply by two because we are writing to a new int, which is 4 bytes
 		disk.writeInt(blockPointer[x]);
 	}
 	
 	//Write Used
-	disk.seek(freeINode + 52);
+	disk.seek(freeINode + 52); // 52 is just the last position before the int we are going to write too
 	disk.writeInt(1);
 	
 	
