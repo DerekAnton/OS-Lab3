@@ -89,8 +89,6 @@ public int create(char name[], int size)
 	  
   }
   
-  
-  
   // Step 3: Allocate data blocks to the file
   // for(i=0;i<size;i++)
     // Scan the block list that you read in Step 1 for a free block
