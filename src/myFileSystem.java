@@ -36,11 +36,7 @@ public static void main(String[] args) throws FileNotFoundException{
 	CreateFS create = new CreateFS();
 	create.createFS(diskName);
 	myFileSystem fileSystem = new myFileSystem(diskName);
-	
-	
 	String[] commands;
-	
-	
 	//Run Commands
 	for(int x = 0 ; x < inputCommands.size() - 1 ; x ++){
 		commands = inputCommands.remove().split(" ");
@@ -48,16 +44,16 @@ public static void main(String[] args) throws FileNotFoundException{
 		if(commands[0].equals("C")){
 			fileSystem.create(commands[1].toCharArray(), Integer.parseInt(commands[2]));
 		}
-		if(commands[0].equals("d")){
+		if(commands[0].equals("D")){
 			fileSystem.detete(commands[1].toCharArray());
 		}
-		if(commands[0].equals("r")){
+		if(commands[0].equals("R")){
 			fileSystem.read(commands[1].toCharArray(), Integer.parseInt(commands[2]), commands[3].toCharArray());
 		}
-		if(commands[0].equals("w")){	
+		if(commands[0].equals("W")){	
 			fileSystem.write(commands[1].toCharArray(), Integer.parseInt(commands[2]), commands[3].toCharArray());
 		}	
-		if(commands[0].equals("l")){	
+		if(commands[0].equals("L")){	
 			fileSystem.ls();
 		}
 
@@ -99,7 +95,7 @@ public int create(char[] name, int size)
 		e.printStackTrace();
 	}
   }
-  
+
   int freeBlockNum = 0;
   for(int i : freeBlocks){
 	  if(i == 0){
@@ -146,15 +142,13 @@ public int create(char[] name, int size)
     // 
  // end for
   if(space){
-	  
 	  for(int i = 0 ; i < size; i++){
-		  int counter = 0;
-		  for(int x : freeBlocks){
-			  if(x == 0){
+		  for(int counter = 0; counter < freeBlocks.length ; counter++){
+			  if(freeBlocks[counter] == 0){
 				  freeBlocks[counter] = 1;
-				  blockPointer[size] = counter;
+				  blockPointer[i] = counter;
+				  break;
 			  }
-			  counter++;
 		  }  
 	  }
 	  
@@ -173,7 +167,7 @@ public int create(char[] name, int size)
 		
 		//Write Name
 		disk.seek(freeINode);
-		for(int x = 0; x < 8; x++){
+		for(int x = 0; x < name.length; x++){
 			disk.writeChar(name[x]);
 			disk.seek(freeINode + 2*x); // multiply by two because we are writing to a new char, which is 2 bytes
 		}
