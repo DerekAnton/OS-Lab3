@@ -1,7 +1,10 @@
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.util.LinkedList;
 
 
 
@@ -11,10 +14,48 @@ class myFileSystem
 
 private File diskFile;
 private RandomAccessFile disk;
+private static LinkedList<String> inputCommands = new LinkedList<String>();
 
 public static void main(String[] args) throws FileNotFoundException{
 	
 	myFileSystem fileSystem = new myFileSystem("disk0".toCharArray());
+	
+	
+	//Get Commands From input file
+	BufferedReader reader = new BufferedReader(new FileReader("input.txt"));
+	String line = null;
+	try {
+		while ((line = reader.readLine()) != null) {
+		    inputCommands.add(line);
+		}
+	} catch (IOException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	}
+
+	//Run Commands
+	String[] commands;
+	for(int x = 0 ; x < inputCommands.size() ; x ++){
+		commands = inputCommands.remove().split(" ");
+		
+		if(commands[0].toLowerCase() == "c"){
+			fileSystem.create(commands[1].toCharArray(), Integer.parseInt(commands[2]) );
+		}
+		if(commands[0].toLowerCase() == "d"){
+			fileSystem.detete(commands[1].toCharArray());
+		}
+		if(commands[0].toLowerCase() == "r"){
+			fileSystem.read(commands[1].toCharArray(), Integer.parseInt(commands[2]), commands[3].toCharArray());
+		}
+		if(commands[0].toLowerCase() == "w"){	
+			fileSystem.write(commands[1].toCharArray(), Integer.parseInt(commands[2]), commands[3].toCharArray());
+		}	
+		if(commands[0].toLowerCase() == "l"){	
+			fileSystem.ls();
+		}
+
+	}
+	
 	
 }
 public myFileSystem(char diskName[]) throws FileNotFoundException{
@@ -22,7 +63,11 @@ public myFileSystem(char diskName[]) throws FileNotFoundException{
    // this file will act as the "disk" for your file system
 	diskFile = new File(diskName.toString());
 	disk = new RandomAccessFile(diskFile, "rw");
+	
+	
+
 }
+
 
 
 public int create(char name[], int size)
