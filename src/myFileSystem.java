@@ -18,7 +18,6 @@ private static LinkedList<String> inputCommands = new LinkedList<String>();
 
 public static void main(String[] args) throws FileNotFoundException{
 	
-	myFileSystem fileSystem = new myFileSystem("disk0".toCharArray());
 	
 	
 	//Get Commands From input file
@@ -35,12 +34,14 @@ public static void main(String[] args) throws FileNotFoundException{
 
 	//Run Commands
 	String diskName = inputCommands.remove();
+	
+	myFileSystem fileSystem = new myFileSystem(diskName);
+
 	String[] commands;
 	for(int x = 0 ; x < inputCommands.size() - 1 ; x ++){
 		commands = inputCommands.remove().split(" ");
 
 		if(commands[0].equals("C")){
-			System.out.println("test");
 			fileSystem.create(commands[1].toCharArray(), Integer.parseInt(commands[2]));
 		}
 		if(commands[0].equals("d")){
@@ -60,14 +61,12 @@ public static void main(String[] args) throws FileNotFoundException{
 	
 	
 }
-public myFileSystem(char diskName[]) throws FileNotFoundException{
+public myFileSystem(String diskName) throws FileNotFoundException{
    // open the file with the above name
    // this file will act as the "disk" for your file system
-	diskFile = new File(diskName.toString());
+	diskFile = new File(diskName);
 	disk = new RandomAccessFile(diskFile, "rw");
 	
-	
-
 }
 
 
@@ -123,7 +122,7 @@ public int create(char name[], int size)
   int freeINode = -1;
   for(int x = 0 ; x < 16 ; x++){
 	  try {
-		disk.seek(180+ (56*x));
+		disk.seek(180 + (56*x));
 		used = disk.readInt();
 		if(used == 0){
 			freeINode = (128 + (56*x));
