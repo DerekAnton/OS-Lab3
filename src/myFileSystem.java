@@ -32,12 +32,16 @@ public static void main(String[] args) throws FileNotFoundException{
 		e.printStackTrace();
 	}
 
-	//Run Commands
 	String diskName = inputCommands.remove();
-	
+	CreateFS create = new CreateFS();
+	create.createFS(diskName);
 	myFileSystem fileSystem = new myFileSystem(diskName);
-
+	
+	
 	String[] commands;
+	
+	
+	//Run Commands
 	for(int x = 0 ; x < inputCommands.size() - 1 ; x ++){
 		commands = inputCommands.remove().split(" ");
 
@@ -71,7 +75,7 @@ public myFileSystem(String diskName) throws FileNotFoundException{
 
 
 
-public int create(char name[], int size)
+public int create(char[] name, int size)
 { //create a file with this name and this size
 
   // high level pseudo code for creating a new file
