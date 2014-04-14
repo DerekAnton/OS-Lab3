@@ -80,16 +80,14 @@ public int create(char name[], int size)
 		used = disk.readInt();
 		if(used == 0){
 			freeINode = (128 + (56*x));
+			space = true;
 			break;
 		}
 	} catch (IOException e) {
 		// TODO Auto-generated catch block
 		e.printStackTrace();
-	}
-	  
-	  
+	} 	  
   }
-  
   // Step 3: Allocate data blocks to the file
   // for(i=0;i<size;i++)
     // Scan the block list that you read in Step 1 for a free block
@@ -97,62 +95,63 @@ public int create(char name[], int size)
     // Set the blockPointer[i] field in the inode to this block number.
     // 
  // end for
-  for(int i = 0 ; i < size; i++){
-	  int counter = 0;
-	  for(int x : freeBlocks){
-		  if(x == 0){
-			  freeBlocks[counter] = 1;
-			  blockPointer[size] = counter;
-		  }
-		  counter++;
-	  }  
-  }
-  
+  if(space){
+	  
+	  for(int i = 0 ; i < size; i++){
+		  int counter = 0;
+		  for(int x : freeBlocks){
+			  if(x == 0){
+				  freeBlocks[counter] = 1;
+				  blockPointer[size] = counter;
+			  }
+			  counter++;
+		  }  
+	  }
+	  
   
   // Step 4: Write out the inode and free block list to disk
   //  Move the file pointer to the start of the file 
   // Write out the 128 byte free block list
   // Move the file pointer to the position on disk where this inode was stored
   // Write out the inode
-  try {
-	//Write Free Block List
-	for(int x = 0; x < 128; x++){
-		disk.seek(x);
-		disk.write(freeBlocks[x]);
+	  try {
+		//Write Free Block List
+		for(int x = 0; x < 128; x++){
+			disk.seek(x);
+			disk.write(freeBlocks[x]);
+		}
+		
+		//Write Name
+		disk.seek(freeINode);
+		for(int x = 0; x < 8; x++){
+			disk.writeChar(name[x]);
+			disk.seek(freeINode + 2*x); // multiply by two because we are writing to a new char, which is 2 bytes
+		}
+		
+		//Write Size
+		disk.seek(freeINode + 16); // 16 because we ended on 8*2 in the above loop, so we must seek after where this value has been written to.
+		disk.writeInt(size);
+		
+		//Write BlackPointers
+		for(int x = 0 ; x < 8 ; x++){
+			disk.seek(freeINode + 20 + 4*x); // start at 20 because the above writes the size to the next integer (4 bytes)  and multiply by two because we are writing to a new int, which is 4 bytes
+			disk.writeInt(blockPointer[x]);
+		}
+		
+		//Write Used
+		disk.seek(freeINode + 52); // 52 is just the last position before the int we are going to write too
+		disk.writeInt(1);
+		
+		
+	} catch (IOException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
 	}
-	
-	//Write Name
-	disk.seek(freeINode);
-	for(int x = 0; x < 8; x++){
-		disk.writeChar(name[x]);
-		disk.seek(freeINode + 2*x); // multiply by two because we are writing to a new char, which is 2 bytes
-	}
-	
-	//Write Size
-	disk.seek(freeINode + 16); // 16 because we ended on 8*2 in the above loop, so we must seek after where this value has been written to.
-	disk.writeInt(size);
-	
-	//Write BlackPointers
-	for(int x = 0 ; x < 8 ; x++){
-		disk.seek(freeINode + 20 + 4*x); // start at 20 because the above writes the size to the next integer (4 bytes)  and multiply by two because we are writing to a new int, which is 4 bytes
-		disk.writeInt(blockPointer[x]);
-	}
-	
-	//Write Used
-	disk.seek(freeINode + 52); // 52 is just the last position before the int we are going to write too
-	disk.writeInt(1);
-	
-	
-} catch (IOException e) {
-	// TODO Auto-generated catch block
-	e.printStackTrace();
-}
+  
+  }
   
   
-  
-  
-  
-return 0;
+  return  (space) ? 1 : 0;
 } // End Create
 
 
