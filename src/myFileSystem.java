@@ -33,6 +33,8 @@ public static void main(String[] args) throws FileNotFoundException{
 	}
 
 	String diskName = inputCommands.remove();
+	diskName = diskName.replaceAll("\\s+", " ");
+	
 	CreateFS create = new CreateFS();
 	create.createFS(diskName);
 	myFileSystem fileSystem = new myFileSystem(diskName);
