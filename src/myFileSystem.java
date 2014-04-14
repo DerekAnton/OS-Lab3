@@ -34,8 +34,9 @@ public static void main(String[] args) throws FileNotFoundException{
 	}
 
 	//Run Commands
+	String diskName = inputCommands.remove();
 	String[] commands;
-	for(int x = 0 ; x < inputCommands.size() ; x ++){
+	for(int x = 0 ; x < inputCommands.size() - 1 ; x ++){
 		commands = inputCommands.remove().split(" ");
 		
 		if(commands[0].toLowerCase() == "c"){
