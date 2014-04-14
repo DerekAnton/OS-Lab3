@@ -38,12 +38,14 @@ public static void main(String[] args) throws FileNotFoundException{
 	CreateFS create = new CreateFS();
 	create.createFS(diskName);
 	myFileSystem fileSystem = new myFileSystem(diskName);
+	String command;
 	String[] commands;
 	int inputSize = inputCommands.size();
 	//Run Commands
 	for(int x = 0 ; x < inputSize; x ++){
 		commands = new String[4];
-		commands = inputCommands.remove().split(" ");
+		command = inputCommands.remove().replaceAll("\\s+", " ");
+		commands = command.split(" ");
 		
 		if(commands[0].equals("C")){	
 			fileSystem.create(commands[1].toCharArray(), Integer.parseInt(commands[2]));
