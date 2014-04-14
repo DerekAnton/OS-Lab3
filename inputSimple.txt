@@ -1,0 +1,5 @@
+disk0
+C file1.c 3
+C file2.c 8
+C file3.c 4
+C a.out   5

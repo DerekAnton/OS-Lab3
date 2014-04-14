@@ -22,7 +22,7 @@ public static void main(String[] args) throws FileNotFoundException{
 	
 	
 	//Get Commands From input file
-	BufferedReader reader = new BufferedReader(new FileReader("input.txt"));
+	BufferedReader reader = new BufferedReader(new FileReader("inputSimple.txt"));
 	String line = null;
 	try {
 		while ((line = reader.readLine()) != null) {
@@ -38,20 +38,21 @@ public static void main(String[] args) throws FileNotFoundException{
 	String[] commands;
 	for(int x = 0 ; x < inputCommands.size() - 1 ; x ++){
 		commands = inputCommands.remove().split(" ");
-		
-		if(commands[0].toLowerCase() == "c"){
-			fileSystem.create(commands[1].toCharArray(), Integer.parseInt(commands[2]) );
+
+		if(commands[0].equals("C")){
+			System.out.println("test");
+			fileSystem.create(commands[1].toCharArray(), Integer.parseInt(commands[2]));
 		}
-		if(commands[0].toLowerCase() == "d"){
+		if(commands[0].equals("d")){
 			fileSystem.detete(commands[1].toCharArray());
 		}
-		if(commands[0].toLowerCase() == "r"){
+		if(commands[0].equals("r")){
 			fileSystem.read(commands[1].toCharArray(), Integer.parseInt(commands[2]), commands[3].toCharArray());
 		}
-		if(commands[0].toLowerCase() == "w"){	
+		if(commands[0].equals("w")){	
 			fileSystem.write(commands[1].toCharArray(), Integer.parseInt(commands[2]), commands[3].toCharArray());
 		}	
-		if(commands[0].toLowerCase() == "l"){	
+		if(commands[0].equals("l")){	
 			fileSystem.ls();
 		}
 
@@ -86,7 +87,7 @@ public int create(char name[], int size)
   boolean space = false;
   int[] blockPointer = new int[8];
   
-  for(int x = 0; x <= 128; x++){
+  for(int x = 0; x < 128; x++){
 	  try {
 		disk.seek(x);
 		freeBlocks[x] = disk.read();
