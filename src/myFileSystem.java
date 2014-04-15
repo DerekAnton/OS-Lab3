@@ -214,7 +214,7 @@ public int create(char[] name, int size)
 
 
 
-public int detete(char name[])
+public int detete(char[] name)
 {
   // Delete the file with this name
 
@@ -225,7 +225,38 @@ public int detete(char name[])
   // If the iinode is in use, check if the "name" field in the
   // inode matches the file we want to delete. IF not, read the next
   //  inode and repeat
-  
+		try {
+			int usedBit = 0;
+			int iNodeStart = 0;
+			char[] currentName = new char[name.length];
+			int[] freeBlocksToDelete = new int[8];
+			int iNodeToDelete;
+			for (int i = 0; i < 16; i++) {
+				usedBit = (128 + 16 + 4 + 32 + 56 * i);
+				iNodeStart = usedBit - (16 + 4 + 32);
+				disk.seek(usedBit);
+				int isUsed = disk.readInt();
+				if (isUsed == 1) {
+					for (int x = 0; x < name.length; x++) {
+						disk.seek(iNodeStart + 2 * x);
+						currentName[x] = disk.readChar();
+					}
+					if (name.toString().equals(currentName.toString())) {
+						iNodeToDelete = iNodeStart;
+						for (int x = 0; x < 8; x++) {
+							disk.seek(iNodeStart + 20 + 4 * x);
+							freeBlocksToDelete[x] = disk.readInt();
+						}
+
+					}
+				}
+
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
   // Step 2: free blocks of the file being deleted
   // Read in the 128 byte free block list (move file pointer to start
  // of the disk and read in 128 bytes)
