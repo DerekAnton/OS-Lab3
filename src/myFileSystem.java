@@ -172,29 +172,33 @@ public int create(char[] name, int size)
 		}
 		
 		//Write Name
-		disk.seek(freeINode );
+		disk.seek(freeINode);
 		for(int x = 0; x < name.length; x++){
 			disk.writeChar(name[x]);
-			System.out.println("free inode " + name[x] + (freeINode + 2*(x+1)) );
+//			System.out.println("free inode " + name[x] + (freeINode + 2*(x+1)) );
 			disk.seek(freeINode + 2*(x+1)); // multiply by two because we are writing to a new char, which is 2 bytes
+		}
+		for(int x = (8-(8-name.length)); x < name.length ; x++){
+			disk.seek(freeINode + 2*(8-x));
+			disk.writeChar('\0');
 		}
 		
 		//Write Size
 		disk.seek(freeINode + 16); // 16 because we ended on 8*2 in the above loop, so we must seek after where this value has been written to.
 		disk.writeInt(size);
-		System.out.println("size " + size +" " + (freeINode + 16) );
+	//	System.out.println("size " + size +" " + (freeINode + 16) );
 		
 		//Write BlackPointers
 		for(int x = 0 ; x < 8 ; x++){
 			disk.seek(freeINode + 20 + 4*x); // start at 20 because the above writes the size to the next integer (4 bytes)  and multiply by two because we are writing to a new int, which is 4 bytes
-			System.out.println("block pointer " + blockPointer[x] + " " + (freeINode + 20 + 4*x));
+		//	System.out.println("block pointer " + blockPointer[x] + " " + (freeINode + 20 + 4*x));
 			disk.writeInt(blockPointer[x]);
 		}
 		
 		//Write Used
 		disk.seek(freeINode + 52); // 52 is just the last position before the int we are going to write too
 		disk.writeInt(1);
-		System.out.println("used " + (freeINode + 52));
+	//	System.out.println("used " + (freeINode + 52));
 		
 		
 	} catch (IOException e) {
@@ -253,6 +257,53 @@ public int ls()
     // If the inode is in-use
       // print the "name" and "size" fields from the inode
  // end for
+	
+	try {
+		int usedBit = 0;
+		int iNodeStart = 0;
+		for(int i = 0 ; i < 16 ; i++){
+			usedBit = (128 + 16 + 4 + 32 + 56*i);
+			iNodeStart = usedBit - (16+4+32);
+			disk.seek(usedBit);
+			int isUsed = disk.readInt();
+			//System.out.println(isUsed + " " + usedBit);
+			if(isUsed == 1){
+				//Read Name
+				System.out.print("File Name: ");
+				for(int x = 0; x < 8; x++){
+					disk.seek(iNodeStart +2*x);
+					System.out.print(disk.readChar());
+				}
+				System.out.print(" ");
+
+				//Read Size
+				System.out.print("  File Size: ");
+				disk.seek(iNodeStart + 16);
+				System.out.print(disk.readInt());
+
+				System.out.print(" ");
+
+				//Read Block Pointers
+				/*
+				System.out.print("Block Pointers: ");
+				for(int x = 0 ; x < 8 ; x++){
+					disk.seek(iNodeStart + 20 + 4*x); 
+					System.out.print(disk.readInt());
+				}
+				
+				System.out.print(" ");
+				System.out.print("File Name: ");
+				System.out.print(1);
+				*/
+				System.out.println("");
+
+			}
+		}
+		
+	} catch (IOException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	}
 	return 0;
 
 } // End ls
