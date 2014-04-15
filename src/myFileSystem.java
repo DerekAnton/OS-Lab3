@@ -15,6 +15,7 @@ class myFileSystem
 private File diskFile;
 private RandomAccessFile disk;
 private static LinkedList<String> inputCommands = new LinkedList<String>();
+private byte [] buffer = new byte [1024];
 
 public static void main(String[] args) throws FileNotFoundException{
 	
@@ -356,6 +357,58 @@ public int ls()
 //buff 1024
 public int read(char name[], int blockNum, char buf[]){
 
+	
+	
+	try {
+		int usedBit = 0;
+		int iNodeStart = 0;
+		char[] currentName = new char[name.length];
+		int[] freeBlocksToDelete = new int[8];
+		int iNodeToRead;
+		for (int i = 0; i < 16; i++) {
+			usedBit = (128 + 16 + 4 + 32 + 56 * i);
+			iNodeStart = usedBit - (16 + 4 + 32);
+			disk.seek(usedBit);
+			int isUsed = disk.readInt();
+			if (isUsed == 1) {
+				
+				for (int x = 0; x < name.length; x++) {
+					disk.seek(iNodeStart + 2 * x);
+					currentName[x] = disk.readChar();
+				}
+
+				//Is this the file you wish to read?
+				if (String.valueOf(name).toString().equals(String.valueOf(currentName))) {
+					/*disk.seek(usedBit);
+					disk.writeInt(0);
+					
+					//Look for what which blocks to free
+					iNodeToRead = iNodeStart;
+					for (int x = 0; x < 8; x++) {
+						disk.seek(iNodeStart + 20 + 4 * x);
+						freeBlocksToDelete[x] = disk.readInt();
+					}
+					
+					
+					//Update Free Blocks
+					for(int pointer : freeBlocksToDelete){
+						disk.seek(pointer);
+						disk.write(0);
+					}*/
+
+				}
+			}
+
+		}
+	}catch (IOException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	}
+	
+	
+	
+	
+	
    // read this block from this file
 
    // Step 1: locate the inode for this file
