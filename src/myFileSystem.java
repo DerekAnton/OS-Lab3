@@ -484,7 +484,6 @@ public int write(char name[], int blockNum, char buf[])
 								blockPointers[x] = disk.readInt();
 							}
 							
-							disk.seek(blockPointers[blockNum] * 1024);
 							for (int x = 0; x < 1024; x++) {
 								disk.seek(blockPointers[blockNum] * 1024 + x);
 								disk.write(buffer[x]);
