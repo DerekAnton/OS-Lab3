@@ -242,9 +242,9 @@ public int detete(char[] name)
 						disk.seek(iNodeStart + 2 * x);
 						currentName[x] = disk.readChar();
 					}
-					
+
 					//Is this the file you wish to delete?
-					if (name.toString().equals(currentName.toString())) {
+					if (String.valueOf(name).toString().equals(String.valueOf(currentName))) {
 						disk.seek(usedBit);
 						disk.writeInt(0);
 						

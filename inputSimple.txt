@@ -5,4 +5,7 @@ C file3.c 4
 C a.out   5
 L
 D file1.c
+D file2.c
+D file3.c
+D a.out
 L
