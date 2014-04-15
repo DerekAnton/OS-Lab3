@@ -379,8 +379,9 @@ public int read(char name[], int blockNum, char buf[]){
 
 				//Is this the file you wish to read?
 				if (String.valueOf(name).toString().equals(String.valueOf(currentName))) {
-					disk.seek(usedBit);
-					disk.writeInt(0);
+					disk.seek(iNodeStart + 16);
+					int size = disk.readInt();
+					
 					
 					//Look for what which blocks to free
 					iNodeToRead = iNodeStart;
@@ -389,11 +390,10 @@ public int read(char name[], int blockNum, char buf[]){
 						freeBlocksToRead[x] = disk.readInt();
 					}
 					
-					
-					//Update Free Blocks
-					for(int pointer : freeBlocksToRead){
-						disk.seek(pointer);
-						disk.write(0);
+					disk.seek(freeBlocksToRead[blockNum] * 1024);
+					for (int x = 0; x < 1024; x++) {
+						disk.seek(freeBlocksToRead[blockNum] * 1024 + x);
+						buffer[x] = (byte)disk.read(); // MAY BE PROBLEMATIC
 					}
 
 				}
