@@ -450,6 +450,56 @@ public int write(char name[], int blockNum, char buf[])
 
     // Write the block! => Write 1024 bytes from the buffer "buff" to 
        // this location
+	
+
+		try {
+			int usedBit = 0;
+			int iNodeStart = 0;
+			char[] currentName = new char[name.length];
+			int[] blockPointers = new int[8];
+			int iNodeToRead;
+			for (int i = 0; i < 16; i++) {
+				usedBit = (128 + 16 + 4 + 32 + 56 * i);
+				iNodeStart = usedBit - (16 + 4 + 32);
+				disk.seek(usedBit);
+				int isUsed = disk.readInt();
+				if (isUsed == 1) {
+
+					for (int x = 0; x < name.length; x++) {
+						disk.seek(iNodeStart + 2 * x);
+						currentName[x] = disk.readChar();
+					}
+					disk.seek(iNodeStart + 16);
+					int size = disk.readInt();
+					
+					// Is this the file you wish to read?
+					if (String.valueOf(name).toString()
+							.equals(String.valueOf(currentName))) {
+						if (blockNum < size) {
+							// Look for what which blocks to free
+							iNodeToRead = iNodeStart;
+							
+							for (int x = 0; x < 8; x++) {
+								disk.seek(iNodeStart + 20 + 4 * x);
+								blockPointers[x] = disk.readInt();
+							}
+							
+							disk.seek(blockPointers[blockNum] * 1024);
+							for (int x = 0; x < 1024; x++) {
+								disk.seek(blockPointers[blockNum] * 1024 + x);
+								disk.write(buffer[x]);
+							}
+						}
+					}
+				}
+
+			}
+	}catch (IOException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	}
+	
+	
 
 	return 0;
 
