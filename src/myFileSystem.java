@@ -237,15 +237,29 @@ public int detete(char[] name)
 				disk.seek(usedBit);
 				int isUsed = disk.readInt();
 				if (isUsed == 1) {
+					
 					for (int x = 0; x < name.length; x++) {
 						disk.seek(iNodeStart + 2 * x);
 						currentName[x] = disk.readChar();
 					}
+					
+					//Is this the file you wish to delete?
 					if (name.toString().equals(currentName.toString())) {
+						disk.seek(usedBit);
+						disk.writeInt(0);
+						
+						//Look for what which blocks to free
 						iNodeToDelete = iNodeStart;
 						for (int x = 0; x < 8; x++) {
 							disk.seek(iNodeStart + 20 + 4 * x);
 							freeBlocksToDelete[x] = disk.readInt();
+						}
+						
+						
+						//Update Free Blocks
+						for(int pointer : freeBlocksToDelete){
+							disk.seek(pointer);
+							disk.write(0);
 						}
 
 					}
