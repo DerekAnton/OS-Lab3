@@ -12,54 +12,70 @@ import java.util.LinkedList;
 class myFileSystem
 {
 
-private File diskFile;
-private RandomAccessFile disk;
-private static LinkedList<String> inputCommands = new LinkedList<String>();
-private byte [] buffer = new byte [1024];
+
+private File diskFile; //Disk File
+private RandomAccessFile disk; //Random Access File used to do operations
+private static LinkedList<String> inputCommands = new LinkedList<String>(); //Commands from input file
+private byte [] buffer = new byte [1024]; // Dummy Buffer
 
 public static void main(String[] args) throws FileNotFoundException{
 	
-	
-	
-	//Get Commands From input file
-	BufferedReader reader = new BufferedReader(new FileReader("inputSimple.txt"));
+	BufferedReader reader = new BufferedReader(new FileReader("input.txt"));
 	String line = null;
 	try {
+		//Grab all the commands from the input file
 		while ((line = reader.readLine()) != null) {
 		    inputCommands.add(line);
 		}
 	} catch (IOException e) {
-		// TODO Auto-generated catch block
 		e.printStackTrace();
 	}
 
+	//First line from file contains disk name
 	String diskName = inputCommands.remove();
 	diskName = diskName.replaceAll("\\s+", " ");
 	
+	//Create new  disk file 
 	CreateFS create = new CreateFS();
 	create.createFS(diskName);
+	
+	//Instantiate new fileSystem Object
 	myFileSystem fileSystem = new myFileSystem(diskName);
+	
+	//Current Command
 	String command;
 	String[] commands;
+	
+	//Number of commands
 	int inputSize = inputCommands.size();
+	
 	//Run Commands
 	for(int x = 0 ; x < inputSize; x ++){
 		commands = new String[4];
 		command = inputCommands.remove().replaceAll("\\s+", " ");
 		commands = command.split(" ");
 		
+		//Call Create
 		if(commands[0].equals("C")){	
 			fileSystem.create(commands[1].toCharArray(), Integer.parseInt(commands[2]));
 		}
+		
+		//Call Delete
 		if(commands[0].equals("D")){
-			fileSystem.detete(commands[1].toCharArray());
+			fileSystem.delete(commands[1].toCharArray());
 		}
+		
+		//Call Read
 		if(commands[0].equals("R")){
-			fileSystem.read(commands[1].toCharArray(), Integer.parseInt(commands[2]), commands[3].toCharArray());
+			fileSystem.read(commands[1].toCharArray(), Integer.parseInt(commands[2]));
 		}
+		
+		//Call Write
 		if(commands[0].equals("W")){	
-			fileSystem.write(commands[1].toCharArray(), Integer.parseInt(commands[2]), commands[3].toCharArray());
+			fileSystem.write(commands[1].toCharArray(), Integer.parseInt(commands[2]));
 		}	
+		
+		//Call LS
 		if(commands[0].equals("L")){	
 			fileSystem.ls();
 		}
@@ -79,30 +95,23 @@ public myFileSystem(String diskName) throws FileNotFoundException{
 
 
 public int create(char[] name, int size)
-{ //create a file with this name and this size
-
-  // high level pseudo code for creating a new file
-
-  // Step 1: check to see if we have sufficient free space on disk by
-  // reading in the free block list. To do this:
-  // move the file pointer to the start of the disk file.
-  // Read the first 128 bytes (the free/in-use block information)
-  // Scan the list to make sure you have sufficient free blocks to
-  // allocate a new file of this size
-  int[] freeBlocks = new int[128];
-  boolean space = false;
-  int[] blockPointer = new int[8];
+{ 
   
+  int[] freeBlocks = new int[128]; //Free Block List Storage
+  boolean space = false;  //Is there spaceto create file
+  int[] blockPointer = new int[8];//Block Pointer storage
+  
+  //Read in Free Blocks
   for(int x = 0; x < 128; x++){
 	  try {
 		disk.seek(x);
 		freeBlocks[x] = disk.read();
 	} catch (IOException e) {
-		// TODO Auto-generated catch block
 		e.printStackTrace();
 	}
   }
 
+  //Count number of free blocks
   int freeBlockNum = 0;
   for(int i : freeBlocks){
 	  if(i == 0){
@@ -110,23 +119,20 @@ public int create(char[] name, int size)
 	  }
   }
   
+  //Is there enough room?
   if(size < freeBlockNum){
 	  space = true;
+  }else{
+	  //Not enough room
+	  System.out.println("not enough space on disk");
   }
   
+ 
   
-  // Step 2: we look  for a free inode om disk
-  // Read in a inode
-  // check the "used" field to see if it is free
-  // If not, repeat the above two steps until you find a free inode
-  // Set the "used" field to 1
-  // Copy the filename to the "name" field
-  // Copy the file size (in units of blocks) to the "size" field
-
- // 128 + 2*8 + 4 +  8*4 + 4
-  //128+52 180
   int used = 0;
   int freeINode = -1;
+  //Read in all the iNodes, looking at the used int.
+  //If a free block is found, stores is
   for(int x = 0 ; x < 16 ; x++){
 	  try {
 		disk.seek(180 + (56*x));
@@ -137,17 +143,17 @@ public int create(char[] name, int size)
 			break;
 		}
 	} catch (IOException e) {
-		// TODO Auto-generated catch block
 		e.printStackTrace();
 	} 	  
   }
-  // Step 3: Allocate data blocks to the file
-  // for(i=0;i<size;i++)
-    // Scan the block list that you read in Step 1 for a free block
-    // Once you find a free block, mark it as in-use (Set it to 1)
-    // Set the blockPointer[i] field in the inode to this block number.
-    // 
- // end for
+ 
+  //No free iNode
+  if(space == false){
+	  System.out.println("not a free inode on disk");
+  }
+  
+  
+  //If there is room for the file, create it and store it on desk
   if(space){
 	  for(int i = 0 ; i < size; i++){
 		  for(int counter = 0; counter < freeBlocks.length ; counter++){
@@ -160,11 +166,7 @@ public int create(char[] name, int size)
 	  }
 	  
   
-  // Step 4: Write out the inode and free block list to disk
-  //  Move the file pointer to the start of the file 
-  // Write out the 128 byte free block list
-  // Move the file pointer to the position on disk where this inode was stored
-  // Write out the inode
+
 	  try {
 		//Write Free Block List
 		for(int x = 0; x < 128; x++){
@@ -215,7 +217,7 @@ public int create(char[] name, int size)
 
 
 
-public int detete(char[] name) // THIS IS SPELLED WRONG, PLEASE CHECK
+public int delete(char[] name) 
 {
   // Delete the file with this name
 
@@ -355,7 +357,7 @@ public int ls()
 } // End ls
 
 //buff 1024
-public int read(char name[], int blockNum, char buf[]){ // char buf[] needs to come out 
+public int read(char[] name, int blockNum){ // char buf[] needs to come out 
 
 	
 	
@@ -431,7 +433,7 @@ public int read(char name[], int blockNum, char buf[]){ // char buf[] needs to c
 } // End read
 
 
-public int write(char name[], int blockNum, char buf[])// char buf[] needs to come out 
+public int write(char[] name, int blockNum)// char buf[] needs to come out 
 {
 
    // write this block to this file
