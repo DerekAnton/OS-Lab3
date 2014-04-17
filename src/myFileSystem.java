@@ -215,7 +215,7 @@ public int create(char[] name, int size)
 
 
 
-public int detete(char[] name)
+public int detete(char[] name) // THIS IS SPELLED WRONG, PLEASE CHECK
 {
   // Delete the file with this name
 
