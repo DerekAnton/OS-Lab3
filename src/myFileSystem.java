@@ -355,7 +355,7 @@ public int ls()
 } // End ls
 
 //buff 1024
-public int read(char name[], int blockNum, char buf[]){
+public int read(char name[], int blockNum, char buf[]){ // char buf[] needs to come out 
 
 	
 	
@@ -431,7 +431,7 @@ public int read(char name[], int blockNum, char buf[]){
 } // End read
 
 
-public int write(char name[], int blockNum, char buf[])
+public int write(char name[], int blockNum, char buf[])// char buf[] needs to come out 
 {
 
    // write this block to this file
