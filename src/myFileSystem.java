@@ -7,11 +7,8 @@ import java.io.RandomAccessFile;
 import java.util.LinkedList;
 
 
-
-
 class myFileSystem
 {
-
 
 private File diskFile; //Disk File
 private RandomAccessFile disk; //Random Access File used to do operations
@@ -431,7 +428,7 @@ public int write(char[] name, int blockNum)// char buf[] needs to come out
 							//write data from buffers
 							for (int x = 0; x < 1024; x++) {
 								disk.seek(blockPointers[blockNum] * 1024 + x);
-								disk.write(1);
+								disk.write(buffer[x]);
 							}
 						}
 					}
@@ -440,7 +437,9 @@ public int write(char[] name, int blockNum)// char buf[] needs to come out
 			}
 	}catch (IOException e) {
 		e.printStackTrace();
-	}	
+	}
+	
+	
 
 	return 0;
 
