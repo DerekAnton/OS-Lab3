@@ -13,10 +13,12 @@ class myFileSystem
 private File diskFile; //Disk File
 private RandomAccessFile disk; //Random Access File used to do operations
 private static LinkedList<String> inputCommands = new LinkedList<String>(); //Commands from input file
-private byte [] buffer = new byte [1024]; // Dummy Buffer
+private static byte [] buffer = new byte [1024]; // Dummy Buffer
 
 public static void main(String[] args) throws FileNotFoundException{
-	
+	for(int i = 0; i < 1024 ; i++){
+		buffer[i] = 1;
+	}
 	BufferedReader reader = new BufferedReader(new FileReader("input.txt"));
 	String line = null;
 	try {
@@ -42,6 +44,8 @@ public static void main(String[] args) throws FileNotFoundException{
 	//Current Command
 	String command;
 	String[] commands;
+	System.out.println( );
+
 	
 	//Number of commands
 	int inputSize = inputCommands.size();
@@ -54,27 +58,39 @@ public static void main(String[] args) throws FileNotFoundException{
 		
 		//Call Create
 		if(commands[0].equals("C")){	
+			System.out.println("Creating File: " + commands[1] + " with size: " +Integer.parseInt(commands[2]) );
 			fileSystem.create(commands[1].toCharArray(), Integer.parseInt(commands[2]));
+			System.out.println( );
+			System.out.println( );
 		}
 		
 		//Call Delete
 		if(commands[0].equals("D")){
+			System.out.println("Deleting File: " + commands[1]);
 			fileSystem.delete(commands[1].toCharArray());
+			System.out.println( );System.out.println( );
 		}
 		
 		//Call Read
 		if(commands[0].equals("R")){
+			System.out.println("Reading File: " + commands[1] + " From Block:  " + Integer.parseInt(commands[2]));
 			fileSystem.read(commands[1].toCharArray(), Integer.parseInt(commands[2]));
+			System.out.println( );System.out.println( );
 		}
 		
 		//Call Write
 		if(commands[0].equals("W")){	
+			System.out.println("Writing File: " + commands[1] + " From Block: " + Integer.parseInt(commands[2]));
 			fileSystem.write(commands[1].toCharArray(), Integer.parseInt(commands[2]));
+			System.out.println( );System.out.println( );
 		}	
 		
 		//Call LS
 		if(commands[0].equals("L")){	
+			System.out.println("------------LS START------------");
 			fileSystem.ls();
+			System.out.println("------------LS END--------------");
+			System.out.println( );System.out.println( );
 		}
 
 	}
@@ -99,15 +115,19 @@ public int create(char[] name, int size)
   int[] blockPointer = new int[8];//Block Pointer storage
   
   //Read in Free Blocks
+  System.out.print("Free Block List: ");
   for(int x = 0; x < 128; x++){
 	  try {
 		disk.seek(x);
 		freeBlocks[x] = disk.read();
+		System.out.print(freeBlocks[x]);
 	} catch (IOException e) {
 		e.printStackTrace();
 	}
   }
-
+  System.out.println("");
+  
+  
   //Count number of free blocks
   int freeBlockNum = 0;
   for(int i : freeBlocks){
@@ -143,7 +163,7 @@ public int create(char[] name, int size)
 		e.printStackTrace();
 	} 	  
   }
- 
+  
   //No free iNode
   if(space == false){
 	  System.out.println("not a free inode on disk");
@@ -152,24 +172,30 @@ public int create(char[] name, int size)
   
   //If there is room for the file, create it and store it on desk
   if(space){
+	  System.out.print("Block Storage Locations: ");
 	  for(int i = 0 ; i < size; i++){
 		  for(int counter = 0; counter < freeBlocks.length ; counter++){
 			  if(freeBlocks[counter] == 0){
+				  System.out.print(" " + counter + " ");
 				  freeBlocks[counter] = 1;
 				  blockPointer[i] = counter;
 				  break;
 			  }
 		  }  
 	  }
-	  
+	  System.out.println();
   
 
 	  try {
 		//Write Free Block List
+		  System.out.print("New Free Block List: ");
 		for(int x = 0; x < 128; x++){
 			disk.seek(x);
 			disk.write(freeBlocks[x]);
+			System.out.print(freeBlocks[x]);
 		}
+		  System.out.println();
+
 		
 		//Write Name
 		disk.seek(freeINode);
@@ -192,8 +218,7 @@ public int create(char[] name, int size)
 		//Write BlackPointers
 		for(int x = 0 ; x < 8 ; x++){
 			disk.seek(freeINode + 20 + 4*x); // start at 20 because the above writes the size to the next integer (4 bytes)  and multiply by two because we are writing to a new int, which is 4 bytes
-
-			disk.writeInt(blockPointer[x]);
+			disk.writeInt(blockPointer[x]);			
 		}
 		
 		//Write Used
@@ -243,10 +268,13 @@ public int delete(char[] name)
 						
 						//Look for what which blocks to free
 						iNodeToDelete = iNodeStart;
+						System.out.print( "Blocks To Deleted");
 						for (int x = 0; x < 8; x++) {
 							disk.seek(iNodeStart + 20 + 4 * x);
 							freeBlocksToDelete[x] = disk.readInt();
+							System.out.print( " " + freeBlocksToDelete[x] + " ");
 						}
+						System.out.println( );
 						
 						//Update Free Blocks
 						for (int pointer : freeBlocksToDelete) {
@@ -364,10 +392,13 @@ public int read(char[] name, int blockNum){
 					disk.seek(freeBlocksToRead[blockNum] * 1024);
 					
 					//read data into buffers
+					System.out.print("Data from block: " );
 					for (int x = 0; x < 1024; x++) {
 						disk.seek(freeBlocksToRead[blockNum] * 1024 + x);
 						buffer[x] = (byte)disk.read(); 
+						System.out.print( buffer[x]);
 					}
+					System.out.println( );
 
 				}
 			}
@@ -426,10 +457,13 @@ public int write(char[] name, int blockNum)// char buf[] needs to come out
 								blockPointers[x] = disk.readInt();
 							}
 							//write data from buffers
+							System.out.println("Buffer Data: " );
 							for (int x = 0; x < 1024; x++) {
 								disk.seek(blockPointers[blockNum] * 1024 + x);
 								disk.write(buffer[x]);
+								System.out.print(buffer[x] );
 							}
+							System.out.println( );
 						}
 					}
 				}
