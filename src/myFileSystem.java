@@ -13,12 +13,10 @@ class myFileSystem
 private File diskFile; //Disk File
 private RandomAccessFile disk; //Random Access File used to do operations
 private static LinkedList<String> inputCommands = new LinkedList<String>(); //Commands from input file
-private static byte [] buffer = new byte [1024]; // Dummy Buffer
+private byte [] buffer = new byte [1024]; // Dummy Buffer
 
 public static void main(String[] args) throws FileNotFoundException{
-	for(int i = 0; i < 1024 ; i++){
-		buffer[i] = 1;
-	}
+	
 	BufferedReader reader = new BufferedReader(new FileReader("input.txt"));
 	String line = null;
 	try {
