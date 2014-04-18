@@ -33,8 +33,8 @@ public static void main(String[] args) throws FileNotFoundException{
 	diskName = diskName.replaceAll("\\s+", " ");
 	
 	//Create new  disk file 
-	CreateFS create = new CreateFS();
-	create.createFS(diskName);
+	//CreateFS create = new CreateFS();
+	//create.createFS(diskName);
 	
 	//Instantiate new fileSystem Object
 	myFileSystem fileSystem = new myFileSystem(diskName);
@@ -110,6 +110,7 @@ public int create(char[] name, int size)
   
   int[] freeBlocks = new int[128]; //Free Block List Storage
   boolean space = false;  //Is there spaceto create file
+  boolean inodeFree = false; //Is there inode available
   int[] blockPointer = new int[8];//Block Pointer storage
   
   //Read in Free Blocks
@@ -154,7 +155,8 @@ public int create(char[] name, int size)
 		used = disk.readInt();
 		if(used == 0){
 			freeINode = (128 + (56*x));
-			space = true;
+			  System.out.println(freeINode);
+			  inodeFree = true;
 			break;
 		}
 	} catch (IOException e) {
@@ -163,13 +165,13 @@ public int create(char[] name, int size)
   }
   
   //No free iNode
-  if(space == false){
+  if(inodeFree == false){
 	  System.out.println("not a free inode on disk");
   }
   
   
   //If there is room for the file, create it and store it on desk
-  if(space){
+  if(space && inodeFree){
 	  System.out.print("Block Storage Locations: ");
 	  for(int i = 0 ; i < size; i++){
 		  for(int counter = 0; counter < freeBlocks.length ; counter++){
@@ -196,6 +198,7 @@ public int create(char[] name, int size)
 
 		
 		//Write Name
+		  System.out.println(freeINode);
 		disk.seek(freeINode);
 		for(int x = 0; x < name.length; x++){
 			disk.writeChar(name[x]);
