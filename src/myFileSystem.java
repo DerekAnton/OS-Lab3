@@ -431,7 +431,7 @@ public int write(char[] name, int blockNum)// char buf[] needs to come out
 							//write data from buffers
 							for (int x = 0; x < 1024; x++) {
 								disk.seek(blockPointers[blockNum] * 1024 + x);
-								disk.write(buffer[x]);
+								disk.write(1);
 							}
 						}
 					}
