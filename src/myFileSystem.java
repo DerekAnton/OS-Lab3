@@ -178,9 +178,10 @@ public int create(char[] name, int size)
 		disk.seek(freeINode);
 		for(int x = 0; x < name.length; x++){
 			disk.writeChar(name[x]);
-
 			disk.seek(freeINode + 2*(x+1)); // multiply by two because we are writing to a new char, which is 2 bytes
 		}
+		
+		//Fill rest of name array with spaces
 		for(int x = (8-(8-name.length)); x < name.length ; x++){
 			disk.seek(freeINode + 2*(8-x));
 			disk.writeChar('\0');
@@ -201,11 +202,8 @@ public int create(char[] name, int size)
 		//Write Used
 		disk.seek(freeINode + 52); // 52 is just the last position before the int we are going to write too
 		disk.writeInt(1);
-
-		
 		
 	} catch (IOException e) {
-		// TODO Auto-generated catch block
 		e.printStackTrace();
 	}
   
@@ -219,28 +217,23 @@ public int create(char[] name, int size)
 
 public int delete(char[] name) 
 {
-  // Delete the file with this name
-
-  // Step 1: Locate the inode for this file
-  // Move the file pointer to the 1st inode (129th byte)
-  // Read in a inode
-  // If the iinode is free, repeat above step.
-  // If the iinode is in use, check if the "name" field in the
-  // inode matches the file we want to delete. IF not, read the next
-  //  inode and repeat
 		try {
 			int usedBit = 0;
 			int iNodeStart = 0;
 			char[] currentName = new char[name.length];
 			int[] freeBlocksToDelete = new int[8];
 			int iNodeToDelete;
+			
+			//Loop through all the iNodes
 			for (int i = 0; i < 16; i++) {
-				usedBit = (128 + 16 + 4 + 32 + 56 * i);
-				iNodeStart = usedBit - (16 + 4 + 32);
+				usedBit = (128 + 16 + 4 + 32 + 56 * i);//address for used bit
+				iNodeStart = usedBit - (16 + 4 + 32); //Address for inode start
 				disk.seek(usedBit);
 				int isUsed = disk.readInt();
+				
+				
 				if (isUsed == 1) {
-					
+					//Check to see if it is file we are looking for
 					for (int x = 0; x < name.length; x++) {
 						disk.seek(iNodeStart + 2 * x);
 						currentName[x] = disk.readChar();
@@ -258,11 +251,12 @@ public int delete(char[] name)
 							freeBlocksToDelete[x] = disk.readInt();
 						}
 						
-						
 						//Update Free Blocks
-						for(int pointer : freeBlocksToDelete){
-							disk.seek(pointer);
-							disk.write(0);
+						for (int pointer : freeBlocksToDelete) {
+							if (pointer != 0) { //If not super
+								disk.seek(pointer);
+								disk.write(0);
+							}
 						}
 
 					}
@@ -270,25 +264,9 @@ public int delete(char[] name)
 
 			}
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
-  // Step 2: free blocks of the file being deleted
-  // Read in the 128 byte free block list (move file pointer to start
- // of the disk and read in 128 bytes)
-  // Free each block listed in the blockPointer fields as follows:
-  // for(i=0;i< inode.size; i++) 
-     // freeblockList[ inode.blockPointer[i] ] = 0;
 
-  // Step 3: mark inode as free
-  // Set the "used" field to 0.
-
-  // Step 4: Write out the inode and free block list to disk
-  //  Move the file pointer to the start of the file 
-  // Write out the 128 byte free block list
-  // Move the file pointer to the position on disk where this inode was stored
-  // Write out the inode
 	return 0;
 
 } // End Delete
@@ -296,27 +274,21 @@ public int delete(char[] name)
 
 public int ls()
 { 
-  // List names of all files on disk
-
-  // Step 1: read in each inode and print!
-  // Move file pointer to the position of the 1st inode (129th byte)
-  // for(i=0;i<16;i++)
-    // REad in a inode
-    // If the inode is in-use
-      // print the "name" and "size" fields from the inode
- // end for
-	
 	try {
 		int usedBit = 0;
 		int iNodeStart = 0;
+		
+		//Loop through inodes
 		for(int i = 0 ; i < 16 ; i++){
-			usedBit = (128 + 16 + 4 + 32 + 56*i);
-			iNodeStart = usedBit - (16+4+32);
+			usedBit = (128 + 16 + 4 + 32 + 56*i);//used bit address 
+			iNodeStart = usedBit - (16+4+32); //inode address
 			disk.seek(usedBit);
-			int isUsed = disk.readInt();
-			//System.out.println(isUsed + " " + usedBit);
+			int isUsed = disk.readInt(); 
+
+			//Is inode in use
 			if(isUsed == 1){
-				//Read Name
+				
+				//Read and print Name
 				System.out.print("File Name: ");
 				for(int x = 0; x < 8; x++){
 					disk.seek(iNodeStart +2*x);
@@ -324,7 +296,7 @@ public int ls()
 				}
 				System.out.print(" ");
 
-				//Read Size
+				//Read and print Size
 				System.out.print("  File Size: ");
 				disk.seek(iNodeStart + 16);
 				System.out.print(disk.readInt());
@@ -349,31 +321,31 @@ public int ls()
 		}
 		
 	} catch (IOException e) {
-		// TODO Auto-generated catch block
 		e.printStackTrace();
 	}
 	return 0;
 
 } // End ls
 
-//buff 1024
-public int read(char[] name, int blockNum){ // char buf[] needs to come out 
 
-	
-	
+public int read(char[] name, int blockNum){ 
 	try {
 		int usedBit = 0;
 		int iNodeStart = 0;
 		char[] currentName = new char[name.length];
 		int[] freeBlocksToRead = new int[8];
 		int iNodeToRead;
+		
+		//Read inodes
 		for (int i = 0; i < 16; i++) {
-			usedBit = (128 + 16 + 4 + 32 + 56 * i);
-			iNodeStart = usedBit - (16 + 4 + 32);
+			usedBit = (128 + 16 + 4 + 32 + 56 * i);//address of used bit
+			iNodeStart = usedBit - (16 + 4 + 32);//inode start bit
 			disk.seek(usedBit);
 			int isUsed = disk.readInt();
+			
+			//Is block in use
 			if (isUsed == 1) {
-				
+				//read name
 				for (int x = 0; x < name.length; x++) {
 					disk.seek(iNodeStart + 2 * x);
 					currentName[x] = disk.readChar();
@@ -393,9 +365,11 @@ public int read(char[] name, int blockNum){ // char buf[] needs to come out
 					}
 					
 					disk.seek(freeBlocksToRead[blockNum] * 1024);
+					
+					//read data into buffers
 					for (int x = 0; x < 1024; x++) {
 						disk.seek(freeBlocksToRead[blockNum] * 1024 + x);
-						buffer[x] = (byte)disk.read(); // MAY BE PROBLEMATIC
+						buffer[x] = (byte)disk.read(); 
 					}
 
 				}
@@ -403,31 +377,13 @@ public int read(char[] name, int blockNum){ // char buf[] needs to come out
 
 		}
 	}catch (IOException e) {
-		// TODO Auto-generated catch block
 		e.printStackTrace();
 	}
 	
 	
 	
 	
-	
-   // read this block from this file
-   
-   // Step 1: locate the inode for this file
-   // Move file pointer to the position of the 1st inode (129th byte)
-   // Read in a inode
-   // If the inode is in use, compare the "name" field with the above file
-   // IF the file names don't match, repeat
 
-   // Step 2: Read in the specified block
-   // Check that blockNum < inode.size, else flag an error
-   // Get the disk address of the specified block
-   // That is, addr = inode.blockPointer[blockNum]
-   // move the file pointer to the block location (i.e., to byte #
-   //addr*1024 in the file)
-
-    // Read in the block! => Read in 1024 bytes from this location
-   // into the buffer "buf"
 	return 0;
  
 } // End read
@@ -436,35 +392,21 @@ public int read(char[] name, int blockNum){ // char buf[] needs to come out
 public int write(char[] name, int blockNum)// char buf[] needs to come out 
 {
 
-   // write this block to this file
-
-   // Step 1: locate the inode for this file
-   // Move file pointer to the position of the 1st inode (129th byte)
-   // Read in a inode
-   // If the inode is in use, compare the "name" field with the above file
-   // IF the file names don't match, repeat
-
-   // Step 2: Write to the specified block
-   // Check that blockNum < inode.size, else flag an error
-   // Get the disk address of the specified block
-   // That is, addr = inode.blockPointer[blockNum]
-   // move the file pointer to the block location (i.e., byte # addr*1024)
-
-    // Write the block! => Write 1024 bytes from the buffer "buff" to 
-       // this location
-	
-
 		try {
 			int usedBit = 0;
 			int iNodeStart = 0;
 			char[] currentName = new char[name.length];
 			int[] blockPointers = new int[8];
 			int iNodeToRead;
+
+			//loop through inodes
 			for (int i = 0; i < 16; i++) {
-				usedBit = (128 + 16 + 4 + 32 + 56 * i);
-				iNodeStart = usedBit - (16 + 4 + 32);
+				usedBit = (128 + 16 + 4 + 32 + 56 * i);//used address
+				iNodeStart = usedBit - (16 + 4 + 32);//inode address
 				disk.seek(usedBit);
 				int isUsed = disk.readInt();
+				
+				//is inode used 
 				if (isUsed == 1) {
 
 					for (int x = 0; x < name.length; x++) {
@@ -481,11 +423,12 @@ public int write(char[] name, int blockNum)// char buf[] needs to come out
 							// Look for what which blocks to free
 							iNodeToRead = iNodeStart;
 							
+							//read in block pointers
 							for (int x = 0; x < 8; x++) {
 								disk.seek(iNodeStart + 20 + 4 * x);
 								blockPointers[x] = disk.readInt();
 							}
-							
+							//write data from buffers
 							for (int x = 0; x < 1024; x++) {
 								disk.seek(blockPointers[blockNum] * 1024 + x);
 								disk.write(buffer[x]);
@@ -496,11 +439,8 @@ public int write(char[] name, int blockNum)// char buf[] needs to come out
 
 			}
 	}catch (IOException e) {
-		// TODO Auto-generated catch block
 		e.printStackTrace();
-	}
-	
-	
+	}	
 
 	return 0;
 
